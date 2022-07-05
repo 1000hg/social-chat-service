@@ -9,7 +9,7 @@ import {
   DataType,
 } from "sequelize-typescript";
 
-@Table({ timestamps: false })
+@Table({ timestamps: true })
 export default class User extends Model {
 
   @AllowNull(false)
@@ -20,12 +20,4 @@ export default class User extends Model {
   @AllowNull(false)
   @Column(DataType.STRING)
   public user_password!: string;
-
-  @AllowNull(false)
-  @Column(DataType.DATEONLY)
-  public create_dtm!: Date;
-
-  @AllowNull(false)
-  @Column(DataType.DATEONLY)
-  public update_dtm!: Date;
 }

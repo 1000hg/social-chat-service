@@ -20,6 +20,8 @@ app.use(indexRouter);
 app.listen(PORT, HOST, async () => {
   console.log(`Server Listening on ${HOST}:${PORT}`);
 
+  sequelize.sync()
+  
   await sequelize.authenticate()
     .then(async () => {
       console.log("connection success");

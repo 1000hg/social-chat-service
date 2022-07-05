@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    <div>
+      <div class="sign-up-form">
+          <input type="text" class="id" name="user_id">
+          <input type="text" class="password" name="user_password">
+          <button class="submit-button">Sign up</button>
+      </div>
+    </div>
+</body>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+  $(".submit-button").click(function() {
+    let params = {
+      user_id: $(".id").val(),
+      user_password: $(".password").val()
+    }
+
+    $.ajax({
+      type: "POST",
+      url: "/signup",
+      data: JSON.stringify(params),
+      contentType: "application/json",
+      success: function(res) {
+        alert(res.message)
+        if (res.status == 200)
+          location.href = "/";
+      }
+    })
+  })
+</script>
+</html>

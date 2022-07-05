@@ -1,4 +1,4 @@
-export interface serviceReturnForm {
+export interface serviceStatusForm {
   status: number;
   message: string;
   responseData: Object;
