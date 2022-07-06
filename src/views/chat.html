@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room</title>
+</head>
+<body>
+  <h1>Room</h1>
+
+  <div class="messages">
+
+  </div>
+  <div>
+    <input type="text" class="input-message" name="input-message">
+    <button class="submit-button">전송</button>
+  </div>
+</body>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  let messages = document.getElementsByClassName('messages')[0];
+  const socket = io();
+
+  socket.on("connect", function () {
+
+  })
+
+  
+
+  $(".submit-button").click(function() {
+    let data = {
+      user_id: getCookie('user_id'),
+      message: $(".input-message").val()
+    }
+
+    console.log(data);
+
+    socket.emit('message', data);
+    $('.input-message').val('');
+  })
+
+  socket.on('message', function(data){
+      let msg = JSON.parse(data);
+      console.log("받음")
+      //sendInfo(data.message)
+  });
+
+  const sendInfo = (message) => {
+	  var let = document.createElement("li")
+	  element.className = 'info';
+	  element.innerHTML = message;
+
+	  addMessage(element);
+  }
+
+  const addMessage = (element) => {
+    messages.appendChild(element);
+  }
+</script>
+</html>

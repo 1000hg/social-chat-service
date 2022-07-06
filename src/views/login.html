@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Login</title>
 </head>
 <body>
+    <h1>Login</h1>
     <div>
       <div>
           <input type="text" class="id" name="user_id">
-          <input type="text" class="password" name="user_password">
-          <button class="submit-button">Sign up</button>
+          <input type="password" class="password" name="user_password">
+          <button class="submit-button">Sign in</button>
       </div>
 
       <div>
@@ -33,7 +34,10 @@
       data: JSON.stringify(params),
       contentType: "application/json",
       success: function(res) {
-        alert(res.message);
+        if(res.status == 200)
+          location.href = "/room"
+        else
+          alert(res.message);
       }
     })
   })

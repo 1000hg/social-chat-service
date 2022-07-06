@@ -1,6 +1,10 @@
 import * as dotenv from "dotenv";
 import express, { Request, Response, NextFunction, response } from 'express';
 import cors from 'cors';
+import http from "http";
+import cookieParser from "cookie-parser";
+import expressSession from "express-session";
+import webSocket from "./socket/index";
 import { sequelize } from "./models";
 import indexRouter from "./routes";
 
@@ -15,13 +19,28 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 })
 
+app.use(cookieParser());
+
+const SESSIONKEY: string = process.env.SESSIONKEY || 'key';
+app.use(
+  expressSession({
+    secret: SESSIONKEY,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+
+
 app.use(indexRouter);
 
-app.listen(PORT, HOST, async () => {
+const httpServer = http.createServer(app);
+webSocket(httpServer);
+
+httpServer.listen(PORT, HOST, async () => {
   console.log(`Server Listening on ${HOST}:${PORT}`);
 
   sequelize.sync()
-  
+
   await sequelize.authenticate()
     .then(async () => {
       console.log("connection success");
@@ -29,4 +48,4 @@ app.listen(PORT, HOST, async () => {
     .catch((e) => {
       console.log('error : ', e);
     })
-})
+});

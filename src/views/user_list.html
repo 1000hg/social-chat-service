@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <span><a href="/room">Rooms</a></span>
+    <span><a href="/user/userList">Users</a></span>
+    <span><a href="/user/friendList">Friends</a></span>
+    <span><a href="/logout">Logout</a></span>
+  </div>
+
+  <h1>UserList</h1>
+
+  <div id="users"></div>
+</body>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+
+  Date.prototype.yyyymmdd = function() {
+    var mm = this.getMonth() + 1;
+    var dd = this.getDate();
+
+    return [this.getFullYear(),
+            (mm>9 ? '' : '0') + mm,
+            (dd>9 ? '' : '0') + dd
+          ].join('');
+  };
+
+  $(() => {
+    $.ajax({
+      type: "GET",
+      url: "/user/getUserList",
+      contentType: "application/json",
+      success: function(res) {
+        if(res.status == 200) {
+          console.log(res)
+          res.responseData.forEach((element, index) => {
+            $('#users').after('<div class="user" style="border:1px solid blue"><div>ID: '+ element.user_id +'</div><div>가입일자 : '+ new Date(element.createdAt).yyyymmdd() +'</div></div>')
+          });
+        }
+      }
+    })
+  })
+</script>
+</html>
