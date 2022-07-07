@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 
 let interval: number = 3000;
 
+
+let user_list:any = []
 export default function webSocket(httpServer: http.Server) {
   const io = new Server(httpServer, {
     cors: {
@@ -14,13 +16,16 @@ export default function webSocket(httpServer: http.Server) {
     console.log("[Socket] New client connected");
 
     socket.on('joinRoom', (data) => {
+      if(!user_list.includes(data.user_id))
+        user_list.push(data.user_id);
       socket.join(data.room)
-      io.to(data.room).emit('joinRoom', data);
+      io.to(data.room).emit('joinRoom', {data, "user_list": user_list});
     });
 
     socket.on('leaveRoom', (data) => {
+      user_list = user_list.filter((element:any) => element !== data.user_id);
       socket.leave(data.room)
-      io.to(data.room).emit('leaveRoom', data);
+      io.to(data.room).emit('leaveRoom', {data, "user_list": user_list});
     });
   
 

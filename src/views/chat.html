@@ -9,6 +9,23 @@
 <body>
   <h1>Chat</h1>
 
+  <div id="title">
+    
+  </div>
+  <hr>
+  <div>
+    <div>
+      현재 접속중인 인원
+      <div id="users_count"></div>
+    </div>
+    <hr>
+    <div>
+      현재 접속중인 사람
+      <div id="users"></div>
+    </div>
+  </div>
+  <hr>
+
   <div class="messages">
 
   </div>
@@ -25,6 +42,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   let messages = document.getElementsByClassName('messages')[0];
+  let room = window.location.pathname.split("");
   const socket = io();
 
   let user = [];
@@ -46,6 +64,8 @@
         }
       }
     })
+
+    $("#title").text(room[room.length - 1] + "번 방");
   })
 
   $("#sendBtn").click(function() {
@@ -78,11 +98,46 @@
   });
 
   socket.on('leaveRoom', (data) => {
+    updateRoom(room[room.length - 1], data.user_list.length)
+
+    $('#users').empty()
+    $('#users_count').empty()
+
+    data.user_list.forEach(element => {
+      $('#users').append($('<div>').text(element + ' '))
+    });
+    $('#users_count').append($('<div>').text( data.user_list.length + '명'))
     $('.messages').append($('<div>').text(data.user_id + '님이 방에 퇴장하셨습니다.'));
   });
 
   socket.on('joinRoom', (data) => {
-    $('.messages').append($('<div>').text(data.user_id + '님이 방에 입장하셨습니다.'));
+    updateRoom(room[room.length - 1], data.user_list.length)
+
+    $('#users').empty()
+    $('#users_count').empty()
+
+    data.user_list.forEach(element => {
+      $('#users').append($('<div>').text(element + ' '))
+    });
+    $('#users_count').append($('<div>').text( data.user_list.length + '명'))
+    $('.messages').append($('<div>').text(data.data.user_id + '님이 방에 입장하셨습니다.'));
   });
+
+  function updateRoom(room_seq, user_count) {
+    let params = {
+      room_seq: room_seq,
+      user_count: user_count
+    }
+
+    $.ajax({
+      type: "Post",
+      url: "/room/updateRoom",
+      data: JSON.stringify(params),
+      contentType: "application/json",
+      success: function(res) {
+        console.log("123");
+      }
+    })
+  }
 </script>
 </html>

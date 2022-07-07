@@ -13,6 +13,8 @@ roomRouter.get("/", (req, res) => {
 
 roomRouter.get("/list", roomController.roomList);
 
+roomRouter.post("/updateRoom", roomController.updateRoom);
+
 roomRouter.get("/chat/:room_seq", (req, res) => {
   if (req.session.isLogined)
     res.sendFile(path.join(__dirname, "../views/chat.html"));

@@ -28,5 +28,24 @@ const roomListService = async () => {
   return returnForm;
 };
 
+const updateRoomService = async (room_seq: number, join_count: number) => {
+  const returnForm: serviceStatusForm = {
+    status: 500,
+    message: "Server error",
+    responseData: {},
+  };
 
-export { roomListService };
+  await Room.update({
+    join_count: join_count
+  },{
+    where : { id: room_seq}
+  }).then(()=>{
+    returnForm.status = 200;
+    returnForm.message = "Success update Room";
+   });
+
+  return returnForm;
+};
+
+
+export { roomListService, updateRoomService };
