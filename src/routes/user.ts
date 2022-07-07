@@ -13,7 +13,10 @@ userRouter.get("/signup", (req, res) => {
 })
 
 userRouter.get("/user/userList", (req, res) => {
-    res.sendFile(path.join(__dirname, "../views/user_list.html"));
+    if (req.session.isLogined)
+        res.sendFile(path.join(__dirname, "../views/user_list.html"));
+    else
+        res.sendFile(path.join(__dirname, "../views/login.html"));
 })
 
 userRouter.post("/signup", userController.signUp);
@@ -24,6 +27,8 @@ userRouter.get("/logout", userController.logout);
 
 userRouter.get("/user/getUser", userController.getUser);
 
-userRouter.get("/user/getUserList", userController.getUserList);
+userRouter.get("/user/getSomeUser", userController.getSomeUser);
+
+userRouter.get("/user/getUserList", userController.getUserList)
 
 export { userRouter };

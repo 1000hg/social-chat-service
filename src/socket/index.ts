@@ -1,6 +1,5 @@
 import http from "http";
 import { Server } from "socket.io";
-import { Message } from '../modules/messageModules'
 
 let interval: number = 3000;
 
@@ -11,8 +10,26 @@ export default function webSocket(httpServer: http.Server) {
     },
   });
   io.on("connection", (socket) => {
+
     console.log("[Socket] New client connected");
 
-    socket.on("disconnect", () => console.log("user disconnect", socket.id));
+    socket.on('joinRoom', (data) => {
+      socket.join(data.room)
+      io.to(data.room).emit('joinRoom', data);
+    });
+
+    socket.on('leaveRoom', (data) => {
+      socket.leave(data.room)
+      io.to(data.room).emit('leaveRoom', data);
+    });
+  
+
+    socket.on("disconnect", () => {
+      console.log("user disconnect", socket.id)}
+    );
+
+    socket.on('chat-msg', (data) => {
+      io.emit('chat-msg', data);
+    });
   });
 }

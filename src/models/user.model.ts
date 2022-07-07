@@ -20,4 +20,8 @@ export default class User extends Model {
   @AllowNull(false)
   @Column(DataType.STRING)
   public user_password!: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public friend_count!: number;
 }

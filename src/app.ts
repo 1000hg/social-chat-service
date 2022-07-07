@@ -19,6 +19,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 })
 
+declare module 'express-session' {
+  interface Session {
+    user_seq: number;
+    isLogined: boolean;
+    user_id: string;
+  }
+}
+
 app.use(cookieParser());
 
 const SESSIONKEY: string = process.env.SESSIONKEY || 'key';

@@ -4,7 +4,8 @@ import {
   loginService,
   signUpService,
   getUserService,
-  getUserListService
+  getUserListService,
+  getSomeUserService
 } from "../services/user-service";
 import { serviceStatusForm } from "../modules/serviceModules";
 
@@ -37,24 +38,21 @@ const login = async (req: Request, res: Response) => {
   }
   const { user_id, user_password } = req.body;
 
-  if (req.session.isLogined) {
-    res.redirect("/room")
-  } else {
-    const returnData: serviceStatusForm = await loginService(user_id, user_password);
+  const returnData: serviceStatusForm = await loginService(user_id, user_password);
 
-    const { status, message, responseData } = returnData;
+  const { status, message, responseData } = returnData;
 
-    if (status == 200) {
-      req.session.isLogined = true;
-      req.session.user_id = user_id;
-    }
-
-    res.status(200).send({
-      status,
-      message,
-      responseData,
-    });
+  if (status == 200) {
+    req.session.isLogined = true;
+    req.session.user_id = responseData.user_id;
+    req.session.user_seq = responseData.id;
   }
+
+  res.status(200).send({
+    status,
+    message,
+    responseData,
+  });
 };
 
 const logout = async (req: Request, res: Response) => {
@@ -84,7 +82,7 @@ const logout = async (req: Request, res: Response) => {
 
 const getUser = async (req: Request, res: Response) => {
 
-  const returnData: serviceStatusForm = await getUserService(req.session.user_id as string)
+  const returnData: serviceStatusForm = await getUserService(req.session.user_id)
 
   const { status, message, responseData } = returnData;
 
@@ -95,9 +93,28 @@ const getUser = async (req: Request, res: Response) => {
   });
 }
 
+const getSomeUser = async (req: Request, res: Response) => {
+  if (!req.query.user_seq) {
+    res.status(200).send({ status: 400, message: "need data" });
+    return;
+  }
+
+  let user_seq:number = +req.query.user_seq
+
+  const returnData: serviceStatusForm = await getSomeUserService(user_seq)
+
+  const { status, message, responseData } = returnData;
+
+   res.status(200).send({
+     status,
+     message,
+     responseData,
+   });
+}
+
 const getUserList = async (req: Request, res: Response) => {
 
-  const returnData: serviceStatusForm = await getUserListService()
+  const returnData: serviceStatusForm = await getUserListService(req.session.user_id, req.session.user_seq)
 
   const { status, message, responseData } = returnData;
 
@@ -106,6 +123,7 @@ const getUserList = async (req: Request, res: Response) => {
     message,
     responseData,
   });
+
 }
 
 
@@ -114,5 +132,6 @@ export default {
   login: login,
   logout: logout,
   getUser: getUser,
-  getUserList: getUserList
+  getUserList: getUserList,
+  getSomeUser: getSomeUser
 };

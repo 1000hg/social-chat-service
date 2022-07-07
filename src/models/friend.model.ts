@@ -22,4 +22,8 @@ export default class Friend extends Model {
   @ForeignKey(() => User)
   @Column(DataType.STRING)
   public to_user!: number;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public is_friend!: boolean;
 }

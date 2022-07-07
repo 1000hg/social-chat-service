@@ -10,7 +10,7 @@
   <div>
     <span><a href="/room">Rooms</a></span>
     <span><a href="/user/userList">Users</a></span>
-    <span><a href="/user/friendList">Friends</a></span>
+    <span><a href="/friend">Friends</a></span>
     <span><a href="/logout">Logout</a></span>
   </div>
 
@@ -26,7 +26,6 @@
       contentType: "application/json",
       success: function(res) {
         if(res.status == 200) {
-          console.log(res)
           res.responseData.forEach(element => {
             $('#rooms').after('<div class="room" style="border:1px solid blue">참여인원 수 : '+ element.join_count +' <a href="/room/chat/'+ element.id +'">방 번호: '+ element.id +'</a></div>')
           });

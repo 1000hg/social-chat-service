@@ -1,5 +1,7 @@
 import User from "../models/user.model";
+import Friend from "../models/friend.model";
 import { serviceStatusForm } from "../modules/serviceModules";
+import { Op } from 'sequelize';
 
 const signUpService = async (
   user_id: string,
@@ -32,6 +34,7 @@ const signUpService = async (
     await new User({
       user_id: user_id || "",
       user_password: user_password || "",
+      friend_count: 0
     })
       .save()
       .then((data) => {
@@ -61,12 +64,14 @@ const loginService = async (user_id: string, user_password: string) => {
       user_id: user_id,
       user_password: user_password
     },
+    raw: true,
   })
     .then(
       async (data) => {
         if (data) {
           returnForm.status = 200;
           returnForm.message = "Login Success";
+          returnForm.responseData = data;
         } else {
           returnForm.status = 400;
           returnForm.message = "Id or Password Wrong";
@@ -114,19 +119,21 @@ const getUserService = async (user_id: string) => {
   return returnForm;
 };
 
-const getUserListService = async () => {
+const getSomeUserService = async (user_seq: number) => {
   const returnForm: serviceStatusForm = {
     status: 500,
     message: "Server error",
     responseData: {},
   };
 
-  await User.findAll({})
+  await User.findOne({
+    where: { id: user_seq }
+  })
     .then(
       async (data) => {
         returnForm.status = 200;
-        returnForm.message = "Success get userList";
-        returnForm.responseData = data;
+        returnForm.message = "Success get user";
+        returnForm.responseData = new Array(data);
       },
       (e) => {
         throw e;
@@ -141,5 +148,33 @@ const getUserListService = async () => {
   return returnForm;
 };
 
+const getUserListService = async (user_id: string, user_seq: number) => {
+  const returnForm: serviceStatusForm = {
+    status: 500,
+    message: "Server error",
+    responseData: {},
+  };
 
-export { signUpService, loginService, getUserService, getUserListService };
+  let user = await User.findAll({
+    where: { 
+      user_id: {[Op.notIn]: [user_id]}
+    },
+    raw: true
+  })
+
+  let friend = await Friend.findAll({
+    where: {
+      from_user: user_seq
+    },
+    raw: true
+  })
+
+  returnForm.status = 200;
+  returnForm.message = "Success get user";
+  returnForm.responseData = { "user": user, "friend": friend };
+
+  return returnForm;
+};
+
+
+export { signUpService, loginService, getUserService, getUserListService, getSomeUserService };
