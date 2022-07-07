@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+</head>
+<body>
+  <h1>Chat</h1>
+
+  <div id="title">
+    
+  </div>
+  <hr>
+  <div>
+    <div>
+      현재 접속중인 인원
+      <div id="users_count"></div>
+    </div>
+    <hr>
+    <div>
+      현재 접속중인 사람
+      <div id="users"></div>
+    </div>
+  </div>
+  <hr>
+
+  <div class="messages">
+
+  </div>
+  <div>
+    <input type="text" class="input-message" name="input-message">
+    <button class="submit-button" id="sendBtn">전송</button>
+    <button class="submit-button" id="leaveBtn">나가기</button>
+  </div>
+  <div class="joinUser">
+
+  </div>
+</body>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  let messages = document.getElementsByClassName('messages')[0];
+  let room = window.location.pathname.split("");
+  const socket = io();
+
+  let user = [];
+  $(document).ready(function() {
+    $.ajax({
+      type: "GET",
+      url: "/user/getUser",
+      contentType: "application/json",
+      success: function(res) {
+        if(res.status == 200) {
+          user = res.responseData
+          socket.on("connect", () => {
+            let data = {
+              user_id: user[0].user_id,
+              room: window.location.pathname
+            }
+            socket.emit('joinRoom', data);
+          });
+        }
+      }
+    })
+
+    $("#title").text(room[room.length - 1] + "번 방");
+  })
+
+  $("#sendBtn").click(function() {
+    let data = {
+      user_id: user[0].user_id,
+      message: $(".input-message").val()
+    }
+
+    if (data.message == "") {
+      alert("Please Enter Message")
+    }
+    else {
+      socket.emit('chat-msg', data);
+      $(".input-message").val("");
+    }    
+  })
+
+  $("#leaveBtn").click(function() {
+    let data = {
+      user_id: user[0].user_id,
+      room: window.location.pathname
+    }
+
+    socket.emit('leaveRoom', data);
+    location.href = "/room"
+  })
+
+  socket.on('chat-msg', (data) => {
+      $('.messages').append($('<div>').text(data.user_id + '  :  ' + data.message));
+  });
+
+  socket.on('leaveRoom', (data) => {
+    updateRoom(room[room.length - 1], data.user_list.length)
+
+    $('#users').empty()
+    $('#users_count').empty()
+
+    data.user_list.forEach(element => {
+      $('#users').append($('<div>').text(element + ' '))
+    });
+    $('#users_count').append($('<div>').text( data.user_list.length + '명'))
+    $('.messages').append($('<div>').text(data.user_id + '님이 방에 퇴장하셨습니다.'));
+  });
+
+  socket.on('joinRoom', (data) => {
+    updateRoom(room[room.length - 1], data.user_list.length)
+
+    $('#users').empty()
+    $('#users_count').empty()
+
+    data.user_list.forEach(element => {
+      $('#users').append($('<div>').text(element + ' '))
+    });
+    $('#users_count').append($('<div>').text( data.user_list.length + '명'))
+    $('.messages').append($('<div>').text(data.data.user_id + '님이 방에 입장하셨습니다.'));
+  });
+
+  function updateRoom(room_seq, user_count) {
+    let params = {
+      room_seq: room_seq,
+      user_count: user_count
+    }
+
+    $.ajax({
+      type: "Post",
+      url: "/room/updateRoom",
+      data: JSON.stringify(params),
+      contentType: "application/json",
+      success: function(res) {
+        console.log("123");
+      }
+    })
+  }
+</script>
+</html>

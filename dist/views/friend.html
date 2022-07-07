@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>friend</title>
+</head>
+<body>
+    <div>
+        <span><a href="/room">Rooms</a></span>
+        <span><a href="/user/userList">Users</a></span>
+        <span><a href="/friend">Friends</a></span>
+        <span><a href="/logout">Logout</a></span>
+    </div>
+    
+    <h1>Friends</h1>
+
+    <div>
+        <span id="inbox">수신함</span>
+        <span id="list">목록</span>
+    </div>
+
+    <div class="inbox-content" style="display: inline;">
+    </div>
+
+    <div class="list-content" style="display: none;">
+    </div>
+      
+</body>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+
+    $(() => {
+        getResponseFriendList()
+    })
+    Date.prototype.yyyymmdd = function() {
+        var mm = this.getMonth() + 1;
+        var dd = this.getDate();
+
+        return [this.getFullYear(),
+                "-" + (mm>9 ? '' : '0') + mm,
+                "-" + (dd>9 ? '' : '0') + dd
+            ].join('');
+    };
+
+    $("#inbox").click(() => {
+        $(".inbox-content").show();
+        $(".list-content").hide();
+
+        getResponseFriendList()
+        $( ".inbox-content" ).empty();
+        $( ".list-content" ).empty();
+    })
+
+    $("#list").click(() => {
+        $(".inbox-content").hide();
+        $(".list-content").show();
+
+        getFriendList();
+        $( ".list-content" ).empty();
+        $( ".inbox-content" ).empty();
+    })
+
+    function getFriendList() {
+        $.ajax({
+            type: "GET",
+            url: "/friend/getFriendList",
+            contentType: "application/json",
+            success: function(res) {
+                if(res.status == 200) {
+                    res.responseData.forEach(element => {
+                        if(element.from_user == res.user_seq) {
+                            $('.list-content').append(
+                            '<div class="user" style="border:1px solid blue">' +
+                                '<div>ID : '+ element.to_user + '</div>' +
+                                '<div>가입날짜 : '+ new Date(element.createdAt).yyyymmdd() + '</div>' +
+                                '<button onclick="deleteFriend('+ element.to_user +', '+ element.from_user +')">친구삭제</button>' +
+                                '<button onclick="DM('+ element.from_user +', '+ element.to_user +')">DM</button>' +
+                            '</div>'
+                            )
+                        } else {
+                            $('.list-content').append(
+                            '<div class="user" style="border:1px solid blue">' +
+                                '<div>ID : '+ element.from_user + '</div>' +
+                                '<div>가입날짜 : '+ new Date(element.createdAt).yyyymmdd() + '</div>' +
+                                '<button onclick="deleteFriend('+ element.from_user +', '+ element.to_user +')">친구삭제</button>' +
+                                '<button onclick="DM('+ element.to_user +', '+ element.from_user +')">DM</button>' +
+                            '</div>'
+                            )
+                        }
+
+                    })
+                }
+            }
+        })
+    }
+
+    function DM(from_user, to_user) {
+        location.href = '/room/chat/' + from_user + '/' + to_user
+    }
+
+
+    function deleteFriend(from_user, to_user) {
+        let params = {
+            from_user: from_user,
+            to_user: to_user
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/friend/deleteFriend",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            success: function(res) {
+                if(res.status == 200) {
+                    alert(res.message)
+                    location.reload();
+                }
+            }
+        })
+    }
+
+    function getResponseFriendList() {
+        $.ajax({
+            type: "GET",
+            url: "/friend/getResponseFriendList",
+            contentType: "application/json",
+            success: function(res) {
+                if(res.status == 200) {
+                    res.responseData.forEach(element => {
+                        $('.inbox-content').append(
+                            '<div class="user" style="border:1px solid blue">' +
+                                '<div>ID : '+ element.from_user + '</div>' +
+                                '<div>가입날짜 : '+ new Date(element.createdAt).yyyymmdd() + '</div>' +
+                                '<button onclick="updateResponseFriend('+ element.from_user +', '+ element.to_user +', 1)">수락</button>' +
+                                '<button onclick="updateResponseFriend('+ element.from_user +', '+ element.to_user +', 3)">거절</button>' +
+                            '</div>'
+                        )
+                    });
+                }
+            }
+        })
+    }
+
+    function updateResponseFriend(from_user, to_user, status) {
+    let params = {
+      from_user: from_user,
+      to_user: to_user,
+      status: status
+    }
+
+    $.ajax({
+      type: "POST",
+      url: "/friend/updateResponseFriendList",
+      data: JSON.stringify(params),
+      contentType: "application/json",
+      success: function(res) {
+        alert(res.message);
+        location.reload();
+      }
+     })
+  }
+</script>
+</html>

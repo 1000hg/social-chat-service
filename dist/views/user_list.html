@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>userList</title>
+</head>
+<body>
+  <div>
+    <span><a href="/room">Rooms</a></span>
+    <span><a href="/user/userList">Users</a></span>
+    <span><a href="/friend">Friends</a></span>
+    <span><a href="/logout">Logout</a></span>
+  </div>
+
+  <h1>UserList</h1>
+
+  <div id="users"></div>
+</body>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+
+  Date.prototype.yyyymmdd = function() {
+    var mm = this.getMonth() + 1;
+    var dd = this.getDate();
+
+    return [this.getFullYear(),
+            "-" + (mm>9 ? '' : '0') + mm,
+            "-" + (dd>9 ? '' : '0') + dd
+          ].join('');
+  };
+  
+  let user = [];
+  $(document).ready(function() {
+    $.ajax({
+      type: "GET",
+      url: "/user/getUser",
+      contentType: "application/json",
+      success: function(res) {
+        if(res.status == 200) {
+          user = res.responseData
+        }
+      }
+    })
+  })
+
+  $(() => {
+    $.ajax({
+      type: "GET",
+      url: "/user/getUserList",
+      contentType: "application/json",
+      success: function(res) {
+        if(res.status == 200) {
+          let array = []
+          res.responseData.friend.forEach(element => {
+            array.push(parseInt(element.to_user))
+          })
+
+          res.responseData.user.forEach((element, index) => {
+
+            let query =  '<div class="user" style="border:1px solid blue">' +
+                '<div>ID: '+ element.user_id +'</div>' +
+                '<div>가입일자 : '+ new Date(element.createdAt).yyyymmdd() +'</div>' +
+                '<div>친구수 : '+ element.friend_count +'</div>';
+            
+            if(array.includes(element.id) == false) {
+              query += '<button onclick="addFriendUser('+ element.id +')">친구 신청</button>';
+            }
+            
+            query += '</div>'
+
+            $('#users').after(query)
+          });
+        }
+      }
+    })
+
+  })
+  
+
+
+  function addFriendUser(to_user) {
+    let params = {
+      from_user: user[0].id,
+      to_user: to_user
+    }
+
+    $.ajax({
+      type: "POST",
+      url: "/friend/addFriend",
+      data: JSON.stringify(params),
+      contentType: "application/json",
+      success: function(res) {
+        alert(res.message);
+      }
+     })
+  }
+
+</script>
+</html>

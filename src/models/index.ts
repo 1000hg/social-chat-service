@@ -1,4 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
+import User from './user.model';
+import Friend from './friend.model';
+import Room from './room.model';
 import { config } from '../config/config'
 
 export const sequelize = new Sequelize(
@@ -21,3 +24,5 @@ export const sequelize = new Sequelize(
     }
   }
 );
+
+sequelize.addModels([User, Room, Friend]);
